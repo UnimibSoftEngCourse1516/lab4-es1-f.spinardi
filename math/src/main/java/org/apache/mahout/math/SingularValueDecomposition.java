@@ -84,7 +84,6 @@ public class SingularValueDecomposition implements java.io.Serializable {
     double[] e = new double[n];
     double[] work = new double[m];
     boolean wantu = true;
-    boolean wantv = true;
     
     // Reduce A to bidiagonal form, storing the diagonal elements
     // in s and the super-diagonal elements in e.
@@ -178,16 +177,14 @@ public class SingularValueDecomposition implements java.io.Serializable {
               a[i][j] += t * work[i];
             }
           }
+        } 
+	    // Place the transformation in V for subsequent
+	    // back multiplication.
+	      
+	    for (int i = k + 1; i < n; i++) {
+	      v[i][k] = e[i];
         }
-        if (wantv) {
-          
-          // Place the transformation in V for subsequent
-          // back multiplication.
-          
-          for (int i = k + 1; i < n; i++) {
-            v[i][k] = e[i];
-          }
-        }
+	    
       }
     }
     
@@ -244,7 +241,6 @@ public class SingularValueDecomposition implements java.io.Serializable {
     
     // If required, generate V.
     
-    if (wantv) {
       for (int k = n - 1; k >= 0; k--) {
         if (k < nrt && e[k] != 0.0) {
           for (int j = k + 1; j < nu; j++) {
@@ -263,7 +259,6 @@ public class SingularValueDecomposition implements java.io.Serializable {
         }
         v[k][k] = 1.0;
       }
-    }
     
     // Main iteration loop for the singular values.
     
@@ -341,13 +336,13 @@ public class SingularValueDecomposition implements java.io.Serializable {
               f = -sn * e[j - 1];
               e[j - 1] = cs * e[j - 1];
             }
-            if (wantv) {
+            
               for (int i = 0; i < n; i++) {
                 t = cs * v[i][j] + sn * v[i][p - 1];
                 v[i][p - 1] = -sn * v[i][j] + cs * v[i][p - 1];
                 v[i][j] = t;
               }
-            }
+            
           }
         }
           break;
@@ -415,13 +410,13 @@ public class SingularValueDecomposition implements java.io.Serializable {
             e[j] = cs * e[j] - sn * s[j];
             g = sn * s[j + 1];
             s[j + 1] = cs * s[j + 1];
-            if (wantv) {
+            
               for (int i = 0; i < n; i++) {
                 t = cs * v[i][j] + sn * v[i][j + 1];
                 v[i][j + 1] = -sn * v[i][j] + cs * v[i][j + 1];
                 v[i][j] = t;
               }
-            }
+            
             t = Algebra.hypot(f, g);
             cs = f / t;
             sn = g / t;
@@ -451,11 +446,11 @@ public class SingularValueDecomposition implements java.io.Serializable {
           
           if (s[k] <= 0.0) {
             s[k] = s[k] < 0.0 ? -s[k] : 0.0;
-            if (wantv) {
+            
               for (int i = 0; i <= pp; i++) {
                 v[i][k] = -v[i][k];
               }
-            }
+            
           }
           
           // Order the singular values.
@@ -467,7 +462,7 @@ public class SingularValueDecomposition implements java.io.Serializable {
             double t = s[k];
             s[k] = s[k + 1];
             s[k + 1] = t;
-            if (wantv && k < n - 1) {
+            if (k < n - 1) {
               for (int i = 0; i < n; i++) {
                 t = v[i][k + 1];
                 v[i][k + 1] = v[i][k];
